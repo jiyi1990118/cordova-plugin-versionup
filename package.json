@@ -1,0 +1,14 @@
+{
+  "name": "cordova-plugin-versionup",
+  "version": "1.0.0",
+  "description": "cordova version update plugin",
+  "main": "www/versionUp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cordova"
+  ],
+  "author": "jary",
+  "license": "ISC"
+}

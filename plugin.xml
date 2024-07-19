@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-versionup"
+    version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+    <name>versionUp</name>
+
+    <js-module name="versionUp" src="www/versionUp.js">
+        <!-- 定义js模块挂载到指定的全局变量 -->
+        <clobbers target="$VersionUp" />
+    </js-module>
+
+    <!-- Config.xml preferences -->
+    <config-file parent="/*" target="config.xml">
+        <!-- 用来设置 Cordova 应用中 loadUrl() 方法的超时时间-->
+        <preference name="loadUrlTimeoutValue" value="60000" />
+    </config-file>
+
+    <!-- 定义安装参数 -->
+    <preference name="config_file" default="$CONFIG_FILE" />
+    <preference name="request_headers" default="$REQUEST_HEADERS" />
+
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="VersionUp">
+                <param name="android-package" value="versionUp.VersionUp" />
+                <!--控制 Activity 自动加载并实例化， 自动触发执行 init、initialize、pluginInitialize、onStart -->
+                <param name="onload" value="true" />
+            </feature>
+
+            <!-- 定义安装参数 -->
+            <preference name="config_file" value="" />
+            <preference name="request_headers" value="" />
+
+            <!-- 设置界面在用户滚动到内容的开头或结尾时不显示任何反馈请设置为true -->
+            <preference name="DisallowOverscroll" value="false" />
+            <!-- 允许您隐藏屏幕顶部的状态栏 默认值:false  推荐的与平台无关的实现方法是使用 cordova-plugin-statusbar 插件-->
+            <preference name="Fullscreen" value="false" />
+            <!-- 设置应用程序的背景颜色。如：0xff0000ff 支持四字节十六进制值，第一个字节表示 Alpha 通道，后面三个字节表示标准 RGB
+            值。注意：transparent值会将应用程序磁贴背景设置为 Windows 上的强调色。 -->
+            <!-- <preference name="BackgroundColor" value="0xff0000ff" /> -->
+            <!-- 它用于在特定的条件下隐藏访问器栏上的键盘 -->
+            <!-- <preference name="HideKeyboardFormAccessoryBar" value="true" /> -->
+            <!-- 允许您锁定方向并防止界面因方向变化而旋转。允许的值:   默认 default ， 横向 landscape ，纵向 portrait -->
+            <preference name="Orientation" value="portrait" />
+            <!-- 启用不安全的文件模式 尽管 AndroidInsecureFileModeEnabled 允许加载本地文件资源，建议尽量配置和使用严格的内容安全策略（CSP）来保护应用的安全性。-->
+            <preference name="AndroidInsecureFileModeEnabled" value="true" />
+            <!-- ############################# 通用 ############################# -->
+            <!-- 该值将替换 webview 的旧 UserAgent，对于大多数情况，请改用 AppendUserAgent -->
+            <!-- <preference name="OverrideUserAgent" value="Mozilla/5.0 My Browser" /> -->
+            <!-- 如果设置，该值将附加到 webview 的旧 UserAgent 的末尾。与 OverrideUserAgent 一起使用时，该值将被忽略。 -->
+            <!-- <preference name="AppendUserAgent" value="My Browser" /> -->
+
+            <!-- ############################# Android 的选项 ############################# -->
+            <!-- 设置过滤来自应用程序的日志消息的最低日志级别 允许值:ERROR, WARN, INFO, DEBUG, VERBOSE -->
+            <!-- <preference name="LogLevel" value="INFO" /> -->
+            <!-- 设置开启Kotlin功能 -->
+            <preference name="GradlePluginKotlinEnabled" value="true" />
+            <!-- 设置如何格式化Kotlin代码以提高可读性 -->
+            <preference name="GradlePluginKotlinCodeStyle" value="official" />
+            <!-- 设置要使用的Kotlin Gradle插件的版本 -->
+            <preference name="GradlePluginKotlinVersion" value="2.0.0" />
+
+
+            <!-- ############################# iOS 的选项 ############################# -->
+            <!-- 设置要使用的Swift版本 -->
+            <!-- <preference name="SwiftVersion" value="1.7.21" /> -->
+
+        </config-file>
+
+
+        <!-- Manifest changes -->
+        <config-file parent="/manifest" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <!--            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />-->
+            <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+        </config-file>
+
+        <!-- <config-file parent="/manifest/application" target="AndroidManifest.xml">
+            <service android:name="webserverplugin.WebServerService" android:stopWithTask="false" />
+        </config-file> -->
+
+
+        <!--  配置Kotlin 协程库 -->
+        <!-- Gradle config -->
+        <framework custom="true" src="src/android/versionUp.gradle" type="gradleReference" />
+        <!--  -->
+        <source-file src="src/android/versionUp.kt" target-dir="src/main/kotlin/versionUp" />
+        <source-file src="src/android/EventBus.kt" target-dir="src/main/kotlin/versionUp" />
+        <source-file src="src/android/config/ActiveModel.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/ApplicationConfig.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/VersionConfigData.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/VersionDiffData.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/LocalSourceManage.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/ServerSourceManage.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/config/SourceNameConfig.kt"
+            target-dir="src/main/kotlin/versionUp/config" />
+        <source-file src="src/android/utils/ConvertJson.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+        <source-file src="src/android/utils/Global.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+        <source-file src="src/android/utils/httpHelper.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+        <source-file src="src/android/utils/AssetsHelper.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+        <source-file src="src/android/utils/PathsHelper.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+        <source-file src="src/android/utils/FilesHelper.kt"
+            target-dir="src/main/kotlin/versionUp/utils" />
+    </platform>
+</plugin>

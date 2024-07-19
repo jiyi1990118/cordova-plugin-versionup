@@ -1,0 +1,241 @@
+package versionUp
+
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.appcompat.app.AppCompatActivity
+import org.apache.cordova.CallbackContext
+import org.apache.cordova.CordovaInterface
+import org.apache.cordova.CordovaPlugin
+import org.apache.cordova.CordovaWebView
+import org.apache.cordova.LOG
+import org.apache.cordova.PluginResult
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.Enumeration
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+
+// 使用kotlin协程
+import kotlinx.coroutines.*
+
+/**
+在 Cordova 插件开发中，callbackContext.success() 方法可以传递以下数据类型的数据：
+
+// 字符串（String）：可以传递任意字符串类型的数据。
+callbackContext.success("这是一个字符串数据");
+
+// 数字（Number）：可以传递整数或浮点数类型的数据。
+callbackContext.success(123); // 整数
+callbackContext.success(3.14); // 浮点数
+
+// 布尔值（Boolean）：可以传递 true 或 false。
+callbackContext.success(true);
+
+
+// JSON 对象（JSONObject）：可以传递 JSON 格式的对象数据。
+JSONObject jsonObject = new JSONObject();
+jsonObject.put("key", "value");
+callbackContext.success(jsonObject);
+
+
+// 数组（JSONArray）：可以传递 JSON 格式的数组数据。
+JSONArray jsonArray = new JSONArray();
+jsonArray.put("item1");
+jsonArray.put("item2");
+callbackContext.success(jsonArray);
+
+
+// 创建 PluginResult 对象，参数分别为结果状态、值、是否持续发送回调
+PluginResult result = new PluginResult(PluginResult.Status.OK, "成功的回调数据");
+// 发送 PluginResult 对象
+callbackContext.sendPluginResult(result);
+
+
+// js测试代码
+$VersionUp.getVersionCode({age:25},r=>console.info(r),e=>console.error(e))
+
+ */
+
+/**
+ * 这个类说明
+ */
+class VersionUp : CordovaPlugin() {
+
+    private var job: Job? = null
+
+    private val activity: AppCompatActivity by lazy {
+        cordova.activity
+    }
+
+    // 生命周期顺序 1
+    init {
+        LOG.i("versionUp", "插件 init");
+    }
+
+    // 生命周期顺序 2
+    // initialize 方法是 Cordova 中的一个生命周期方法，用于初始化 Cordova 的 CordovaWebView 和 CordovaInterface。该方法通常在插件类的基类 CordovaPlugin 中被调用。
+    // 主要特点：
+    // 在每次创建 WebView 时调用。
+    // 适合用于需要在每次 WebView 创建时执行的初始化代码。
+    override fun initialize(cordova: CordovaInterface?, webView: CordovaWebView?) {
+        super.initialize(cordova, webView)
+
+        LOG.i("versionUp", "插件 initialize");
+    }
+
+    // 生命周期顺序 3
+    // pluginInitialize 是 Cordova 插件类中的一个方法。这个方法会在插件实例化时调用，通常用于插件的初始化操作。
+    // 根目录下plugin.xml的文件中 新增属性 onload 并且设置为true,会自动初始化
+    // 主要特点：
+    // 仅在插件首次创建时调用一次。
+    // 适合用于执行一次性的初始化代码。
+    override fun pluginInitialize() {
+        super.pluginInitialize()
+
+        // 初始化插件
+        LOG.i("versionUp", "初始化插件");
+    }
+
+
+    // 生命周期顺序 4
+    // 这个方法在Activity 由不可见变为可见的时候调用。
+    override fun onStart() {
+        super.onStart()
+        LOG.i("versionUp", "插件 start");
+    }
+
+    // 前台生存期
+    // 这个方法在Activity 准备好和用户进行交互的时候调用。
+    // 此时的Activity 定位于返回栈的栈顶，并且处于运行状态
+    override fun onResume(multitasking: Boolean) {
+        super.onResume(multitasking)
+        LOG.i("versionUp", "插件 Resume");
+    }
+
+    // 执行插件
+    override fun execute(
+        action: String,
+        args: JSONArray,
+        callbackContext: CallbackContext
+    ): Boolean {
+
+        // 插件方法执行
+        LOG.i("versionUp", "$action 方法被执行");
+
+        return if (action == "getVersionCode") {
+            getVersionCode(args.getString(0), callbackContext)
+        } else {
+            callbackContext.error("versionUp插件中未找到 [ $action ] 方法！")
+            false
+        }
+    }
+
+    // 获取版本号
+    private fun getVersionCode(msg: String, callbackContext: CallbackContext): Boolean {
+        return if (msg.isNotEmpty()) {
+
+            var applicationInfo = activity.applicationInfo;
+
+            // 获取包信息
+            var packageInfo =
+                activity.packageManager.getPackageInfo(activity.packageName, 0)
+
+            var versionCode = packageInfo.versionCode;
+
+            var versionName = packageInfo.versionName;
+
+            // 整合数据
+            var jsonObject = JSONObject();
+            jsonObject.put("versionCode", versionCode);
+            jsonObject.put("versionName", versionName);
+            jsonObject.put("msg", msg);
+
+            jsonObject.put("sourceDir", applicationInfo.sourceDir)
+            jsonObject.put("dataDir", applicationInfo.dataDir)
+            jsonObject.put("nativeLibraryDir", applicationInfo.nativeLibraryDir)
+            jsonObject.put("publicSourceDir", applicationInfo.publicSourceDir)
+            jsonObject.put("className", applicationInfo.className)
+            jsonObject.put("packageName", applicationInfo.packageName)
+            jsonObject.put("targetSdkVersion", applicationInfo.targetSdkVersion)
+
+            // 获取应用权限信息
+            val permissions = activity.packageManager.getPackageInfo(
+                activity.applicationInfo.packageName,
+                PackageManager.GET_PERMISSIONS
+            ).requestedPermissions
+            jsonObject.put("permissions", permissions?.let { JSONArray(it) } ?: JSONArray())
+
+
+            var array = JSONArray();
+            array.put(2);
+            array.put("item2")
+
+
+            array.put(activity.filesDir.absolutePath)
+            getSourceFile(applicationInfo.sourceDir, array)
+
+
+            jsonObject.put("list", array);
+
+
+            var result = PluginResult(PluginResult.Status.OK, jsonObject);
+
+            // 用于指示 CallbackContext 是否应该在发送插件结果后保持活动状态。
+            // 默认为 false，这意味着回调在一次响应后即关闭。
+            // 如果设置为 true，回调将保持打开状态，可以继续接收后续的插件结果。
+            result.keepCallback = true;
+
+            callbackContext.sendPluginResult(result);
+
+//            callbackContext.success(jsonObject)
+            //
+            job = CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val result = withContext(Dispatchers.IO) {
+                        // Simulate a long-running task
+                        delay(5000)
+                        "Task Complete"
+                    }
+                    callbackContext.success(result)
+                } catch (e: Exception) {
+                    callbackContext.error("Task failed: ${e.message}")
+                }
+            }
+
+            true
+        } else {
+
+            callbackContext.error("参数错误")
+            false
+        }
+    }
+
+
+    // 获取app中所有资源文件名称
+    private fun getSourceFile(sourceDir: String, arrayList: JSONArray) {
+        val jarFile: JarFile = JarFile(sourceDir);
+
+        // jar文件迭代器
+        val filesEnumeration: Enumeration<JarEntry> = jarFile.entries();
+
+        // 检查集合中是否还有更多元素
+        while (filesEnumeration.hasMoreElements()) {
+            var entry = filesEnumeration.nextElement();
+
+            entry.name.also { name ->
+//                if (name.startsWith("assets/www")) {
+                    arrayList.put(name);
+//                }
+            }
+        }
+
+        jarFile.close()
+
+    }
+
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
+    }
+
+}

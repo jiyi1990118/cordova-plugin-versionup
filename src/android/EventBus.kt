@@ -1,0 +1,5 @@
+package versionUp
+
+class EventBus {
+
+}
